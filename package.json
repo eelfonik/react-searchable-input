@@ -1,0 +1,58 @@
+{
+  "name": "react-searchable-input",
+  "version": "0.01",
+  "description": "React input component with search & select bulidin",
+  "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint src docs",
+    "test": "npm run lint && jest",
+    "coverage": "npm test -- --coverage",
+    "start": "cross-env NODE_ENV=development node -r babel-register docs/server.js",
+    "build": "npm run build:less && npm run build:lib && npm run build:umd && npm run build:min && npm run build:less:umd && npm run build:less:umd:min",
+    "prebuild": "npm run clean:lib && npm test",
+    "docs": "npm run clean:docs && npm run build:docs && cpy docs/favicon.ico public/",
+    "deploy": "npm run docs && gh-pages -d public",
+    "postpublish": "git push origin master --follow-tags",
+    "minor": "npm version minor && npm publish",
+    "major": "npm version major && npm publish",
+    "patch": "npm version patch && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eelfonik/react-searchable-input.git"
+  },
+  "files": [
+    "lib",
+    "umd"
+  ],
+  "keywords": [
+    "input",
+    "select",
+    "react-searchable-input",
+    "input",
+    "search",
+    "react",
+    "checkbox"
+  ],
+  "author": {
+    "name": "kino flee",
+    "email": "kinoflee@gmail.com",
+    "url": "https://github.com/eelfonik"
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eelfonik/react-searchable-input/issues"
+  },
+  "homepage": "https://github.com/eelfonik/react-searchable-input#readme",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "prop-types": "^15.6.1",
+    "react": "^16.3.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.10"
+  }
+}
