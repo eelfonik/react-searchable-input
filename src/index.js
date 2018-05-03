@@ -1,2 +1,2 @@
-import SearchableInput from 'SearchableInput';
+import SearchableInput from './SearchableInput';
 export default SearchableInput;

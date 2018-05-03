@@ -1,12 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import includes from "lodash/includes";
-import isEmpty from "lodash/isEmpty";
-import isEqual from "lodash/isEqual";
-import isBoolean from "lodash/isBoolean";
-import without from "lodash/without";
-import throttle from "lodash/throttle";
-import drop from "lodash/drop";
+import { includes, isEmpty, isEqual, isBoolean, without, throttle, drop } from "lodash-es";
 import ClickOutside from './utils/ClickOutside';
 import { addOrRemoveItem } from "./utils/addOrRemoveItem";
 
@@ -82,7 +76,7 @@ class SearchableInput extends Component {
     }
   }
 
-  handleOutsideClick = (e) => {
+  handleOutsideClick = () => {
     if (this.props.onBlur) {
       this.props.onBlur();
     }
@@ -126,7 +120,7 @@ class SearchableInput extends Component {
     });
   };
 
-  onListItemClick = value => (e) => {
+  onListItemClick = value => () => {
     this.setState(
       {
         results: isBoolean(this.props.closeOnSelect)
@@ -168,7 +162,7 @@ class SearchableInput extends Component {
     }
   };
 
-  onSelectAllClicked = (e) => {
+  onSelectAllClicked = () => {
     if (this.selectAll.checked) {
       this.setState(
         {
@@ -229,7 +223,6 @@ class SearchableInput extends Component {
       classNames,
       listClassName,
       inputClassName,
-      onPressEnter,
       showError,
       defaultError,
       multi,
