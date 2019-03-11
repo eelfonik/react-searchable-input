@@ -11,6 +11,7 @@ class SearchableInput extends Component {
       ? this.props.resultsCollapse
       : true;
     this.state = {
+      input: '',
       searchCache: [],
       results: this.props.collection,
       resultsCollapse: this.initCollapse,
@@ -38,7 +39,6 @@ class SearchableInput extends Component {
     listClassName: PropTypes.string,
     classNames: PropTypes.string,
     onListItemClick: PropTypes.func,
-    labelValue: PropTypes.string.isRequired,
     onValueChange: PropTypes.func.isRequired,
     onBlur: PropTypes.func,
     onFocus: PropTypes.func,
@@ -86,6 +86,9 @@ class SearchableInput extends Component {
   };
 
   handleChange = (e) => {
+    this.setState({
+      input: e.target.value
+    })
     const maybeCached = this.state.searchCache.find(
       cache => cache.query === e.target.value
     );
@@ -123,6 +126,7 @@ class SearchableInput extends Component {
   onListItemClick = value => () => {
     this.setState(
       {
+        input: value.label || value,
         results: isBoolean(this.props.closeOnSelect)
           ? this.state.results
           : this.props.collection,
@@ -218,7 +222,6 @@ class SearchableInput extends Component {
   render() {
     const {
       isDisabled,
-      labelValue,
       placeholder,
       classNames,
       listClassName,
@@ -232,7 +235,7 @@ class SearchableInput extends Component {
     } = this.props;
     const textFieldValue = multi
       ? textValue
-      : labelValue ? labelValue : placeholder || "Choose a label";
+      : this.state.input ? this.state.input : placeholder || "Choose a label";
     return (
       <div
         className={`searchableInput ${
@@ -256,7 +259,7 @@ class SearchableInput extends Component {
             <input
               type="text"
               disabled={isDisabled}
-              value={labelValue || ""}
+              value={this.state.input}
               placeholder={placeholder ? placeholder : "Filter"}
               className={`input-search ${inputClassName ? inputClassName : ""}`}
               onKeyPress={this.handleKeyPress}
