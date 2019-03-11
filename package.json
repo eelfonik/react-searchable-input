@@ -2,7 +2,7 @@
   "name": "react-searchable-input",
   "version": "0.0.1",
   "description": "React input component with search & select bulidin",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "lint": "eslint src docs",
     "test": "npm run lint && jest",
@@ -44,22 +44,27 @@
   },
   "homepage": "https://github.com/eelfonik/react-searchable-input#readme",
   "devDependencies": {
-    "babel": "^6.23.0",
-    "babel-eslint": "^8.2.3",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^4.19.1",
-    "eslint-plugin-react": "^7.7.0",
-    "jest": "^22.4.3",
-    "prop-types": "^15.6.1",
-    "react": "^16.3.2",
-    "webpack": "^4.6.0",
-    "webpack-cli": "^2.1.2"
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/preset-react": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.15.1",
+    "eslint-plugin-react": "^7.12.4",
+    "jest": "^24.3.1",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.4",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
+  },
+  "peerDependencies": {
+    "prop-types": "^15.7.2",
+    "react": "^16.8.4"
   },
   "dependencies": {
-    "lodash-es": "^4.17.10"
+    "lodash-es": "^4.17.11"
   }
 }
