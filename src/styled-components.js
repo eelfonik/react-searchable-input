@@ -23,7 +23,7 @@ export const InputWrapper = styled.div.attrs(({ collapse, border }) => ({
   maxHeight: collapse ? '0px' : '100vh',
   border,
 }))`
-  width: calc(100% - 5px);
+  width: 100%;
   position: absolute;
   left: 0;
   top: 0;
@@ -53,9 +53,12 @@ export const Input = styled.input`
   }
 `;
 
-export const SearchList = styled.ul`
+export const SearchList = styled.ul.attrs(() => ({
+  borderColor: '#e4eaf0',
+}))`
   font-size: 14px;
   border: 1px solid #e4eaf0;
+  border-color: ${props => props.borderColor};
   max-height: 218px;
   overflow: scroll;
 `;
@@ -63,8 +66,8 @@ export const SearchList = styled.ul`
 export const SearchListItem = styled.li`
   box-sizing: border-box;
   padding: 6px 10px;
-  background: #fff;
-  color: #000;
+  background: inherit;
+  color: inherit;
   line-height: 20px;
   &:not(:last-child) {
       border-bottom: 1px solid #e4eaf0;
@@ -76,8 +79,3 @@ export const ErrorInfo = styled.span`
   color: #ff0000;
 `;
 
-export const PriceValue = styled.span`
-  margin-left: 0.5rem;
-  font-size: 1.5em;
-  color: #ffe818;
-`;
