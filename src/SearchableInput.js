@@ -1,8 +1,25 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { includes, isEmpty, isEqual, isBoolean, without, throttle, drop } from "lodash-es";
-import ClickOutside from './utils/ClickOutside';
+import {
+  includes,
+  isEmpty,
+  isEqual,
+  isBoolean,
+  without,
+  throttle,
+  drop
+} from "lodash-es";
+import ClickOutside from "./utils/ClickOutside";
 import { addOrRemoveItem } from "./utils/addOrRemoveItem";
+import {
+  Wrapper,
+  Text,
+  InputWrapper,
+  Input,
+  SearchList,
+  SearchListItem,
+  ErrorInfo
+} from "./styled-components";
 
 class SearchableInput extends Component {
   constructor(props) {
@@ -11,7 +28,8 @@ class SearchableInput extends Component {
       ? this.props.resultsCollapse
       : true;
     this.state = {
-      input: '',
+      input: "",
+      focused: false,
       searchCache: [],
       results: this.props.collection,
       resultsCollapse: this.initCollapse,
@@ -35,9 +53,6 @@ class SearchableInput extends Component {
     ).isRequired,
     onPressEnter: PropTypes.func,
     placeholder: PropTypes.string,
-    inputClassName: PropTypes.string,
-    listClassName: PropTypes.string,
-    classNames: PropTypes.string,
     onListItemClick: PropTypes.func,
     onValueChange: PropTypes.func.isRequired,
     onBlur: PropTypes.func,
@@ -46,16 +61,17 @@ class SearchableInput extends Component {
     defaultError: PropTypes.string,
     isDisabled: PropTypes.bool,
     resultsCollapse: PropTypes.bool,
-    ajaxSearch: PropTypes.bool,
+    ayncSearch: PropTypes.bool,
     closeOnSelect: PropTypes.bool,
     multi: PropTypes.bool,
-    textValue: PropTypes.string,
     selectAllByDefault: PropTypes.bool,
     selectAllText: PropTypes.shape({
       selectAll: PropTypes.string,
       unSelectAll: PropTypes.string
     }),
-    enableSelectAll: PropTypes.bool
+    enableSelectAll: PropTypes.bool,
+    theme: PropTypes.object,
+    renderListItem: PropTypes.func
   };
 
   componentDidMount() {
@@ -81,14 +97,15 @@ class SearchableInput extends Component {
       this.props.onBlur();
     }
     this.setState({
+      focused: false,
       resultsCollapse: this.initCollapse
     });
   };
 
-  handleChange = (e) => {
+  handleChange = e => {
     this.setState({
       input: e.target.value
-    })
+    });
     const maybeCached = this.state.searchCache.find(
       cache => cache.query === e.target.value
     );
@@ -97,15 +114,15 @@ class SearchableInput extends Component {
     }
     const resultArray = maybeCached
       ? maybeCached.data
-      : e.target.value === "" || this.props.ajaxSearch
-        ? this.props.collection
-        : this.props.collection.filter((item) => {
-            const itemName = item.label || item;
-            return (
-              includes(itemName, e.target.value) ||
-              includes(itemName.toLowerCase(), e.target.value)
-            );
-          });
+      : e.target.value === "" || this.props.ayncSearch
+      ? this.props.collection
+      : this.props.collection.filter(item => {
+          const itemName = item.label || item;
+          return (
+            includes(itemName, e.target.value) ||
+            includes(itemName.toLowerCase(), e.target.value)
+          );
+        });
     const newSearchCache = maybeCached
       ? this.state.searchCache
       : [
@@ -127,6 +144,7 @@ class SearchableInput extends Component {
     this.setState(
       {
         input: value.label || value,
+        focused: false,
         results: isBoolean(this.props.closeOnSelect)
           ? this.state.results
           : this.props.collection,
@@ -140,7 +158,7 @@ class SearchableInput extends Component {
                   this.state.selectedItems.map(item => item.id),
                   value.id
                 ),
-                col.id
+                col.id.toString()
               )
             )
           : value
@@ -156,7 +174,7 @@ class SearchableInput extends Component {
     }
   };
 
-  handleKeyPress = (e) => {
+  handleKeyPress = e => {
     const key = e.keyCode || e.charCode || 0;
     if (key === 13) {
       e.preventDefault();
@@ -197,14 +215,15 @@ class SearchableInput extends Component {
     }
   };
 
-  onFocus = (e) => {
+  onFocus = e => {
     if (this.props.onFocus) {
       this.props.onFocus(e);
     }
     this.setState(
       {
         results: this.props.collection,
-        resultsCollapse: false
+        resultsCollapse: false,
+        focused: true
       },
       () => {
         this.refreshSelectAll();
@@ -223,77 +242,63 @@ class SearchableInput extends Component {
     const {
       isDisabled,
       placeholder,
-      classNames,
-      listClassName,
-      inputClassName,
       showError,
       defaultError,
       multi,
-      textValue,
       selectAllText,
-      enableSelectAll
+      enableSelectAll,
+      renderListItem
     } = this.props;
-    const textFieldValue = multi
-      ? textValue
-      : this.state.input ? this.state.input : placeholder || "Choose a label";
+    const textFieldValue = this.state.input
+      ? this.state.input
+      : placeholder || "Choose a label"; // eslint-disable-line no-extra-boolean-cast
     return (
-      <div
-        className={`searchableInput ${
-          classNames ? classNames : ""
-        }`}
-      >
-        <div
+      <Wrapper>
+        <Text
           onClick={isDisabled ? null : this.showDropdown}
-          className={`searchableInput-text ${
-            inputClassName ? inputClassName : ""
-          } ${isDisabled ? "-disabled" : ""}`}
+          disabled={isDisabled}
+          visible={!this.state.focused}
         >
           {textFieldValue}
-        </div>
+        </Text>
         <ClickOutside handleOutsideClick={this.handleOutsideClick}>
-          <div
-            className={`searchableInput-selectWrap ${
-              listClassName ? listClassName : ""
-            } ${this.state.resultsCollapse ? "-collapse" : ""}`}
+          <InputWrapper
+            collapse={this.state.resultsCollapse}
+            border={this.props.theme.border}
           >
-            <input
+            <Input
               type="text"
               disabled={isDisabled}
               value={this.state.input}
               placeholder={placeholder ? placeholder : "Filter"}
-              className={`input-search ${inputClassName ? inputClassName : ""}`}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
               onFocus={this.onFocus}
               ref={input => (this.filterSearch = input)}
             />
             {!isEmpty(this.state.results) && (
-              <ul
-                className={`searchableInput-list ${
-                  listClassName ? listClassName : ""
-                }`}
-              >
-                {multi &&
-                  enableSelectAll && (
-                    <li key="all" className="searchableInput-listItem">
-                      <label className="input-checkbox-label">
-                        <input
-                          type="checkbox"
-                          className="input-checkbox"
-                          disabled={false}
-                          onChange={this.onSelectAllClicked}
-                          ref={input => (this.selectAll = input)}
-                        />
-                        <span>
-                          {this.state.allSelected
-                            ? selectAllText.unSelectAll
-                            : selectAllText.selectAll}
-                        </span>
-                      </label>
-                    </li>
-                  )}
-                {this.state.results.map((item, i) => multi ? (
-                    <li key={i} className="searchableInput-listItem">
+              <SearchList>
+                {multi && enableSelectAll && (
+                  <SearchListItem key="all">
+                    <label className="input-checkbox-label">
+                      <input
+                        type="checkbox"
+                        className="input-checkbox"
+                        disabled={false}
+                        onChange={this.onSelectAllClicked}
+                        ref={input => (this.selectAll = input)}
+                      />
+                      <span>
+                        {this.state.allSelected
+                          ? selectAllText.unSelectAll
+                          : selectAllText.selectAll}
+                      </span>
+                    </label>
+                  </SearchListItem>
+                )}
+                {this.state.results.map((item, i) =>
+                  multi ? (
+                    <SearchListItem key={`${item.id}-${i}`}>
                       <label className="input-checkbox-label">
                         <input
                           type="checkbox"
@@ -304,24 +309,32 @@ class SearchableInput extends Component {
                         />
                         <span>{item.label || item}</span>
                       </label>
-                    </li>
+                    </SearchListItem>
                   ) : (
-                    <li key={i} onClick={this.onListItemClick(item)} className="searchableInput-listItem">
-                      <label>
-                        <span>{item.label || item}</span>
-                      </label>
-                    </li>
-                  ))}
-              </ul>
+                    <SearchListItem
+                      key={`${item.id}-${i}`}
+                      onClick={this.onListItemClick(item)}
+                    >
+                      {renderListItem ? (
+                        renderListItem(item)
+                      ) : (
+                        <label>
+                          <span>{item.label || item}</span>
+                        </label>
+                      )}
+                    </SearchListItem>
+                  )
+                )}
+              </SearchList>
             )}
-          </div>
+          </InputWrapper>
         </ClickOutside>
-        {showError ? (
-          <span className="input-error">
+        {showError && (
+          <ErrorInfo>
             {defaultError ? defaultError : "please select a valid label"}
-          </span>
-        ) : null}
-      </div>
+          </ErrorInfo>
+        )}
+      </Wrapper>
     );
   }
 }
