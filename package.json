@@ -4,7 +4,7 @@
   "description": "React input component with search & select bulidin",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src docs",
+    "lint": "eslint src/*",
     "test": "npm run lint && jest",
     "coverage": "npm test -- --coverage",
     "build": "webpack --mode production --module-bind js=babel-loader",
@@ -53,6 +53,7 @@
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "eslint": "^5.15.1",
+    "eslint-plugin-jest": "^22.3.2",
     "eslint-plugin-react": "^7.12.4",
     "jest": "^24.3.1",
     "prop-types": "^15.7.2",
