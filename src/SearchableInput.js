@@ -10,7 +10,7 @@ import {
   drop
 } from "lodash-es";
 import ClickOutside from "./utils/ClickOutside";
-import { addOrRemoveItem } from "./utils/addOrRemoveItem";
+import { addOrRemoveItem, hasItem } from "./utils/addOrRemoveItem";
 import {
   Wrapper,
   Text,
@@ -21,24 +21,43 @@ import {
   ErrorInfo
 } from "./styled-components";
 
+const _noop = () => {}
+
+const updateSearchCache = (prevCache, input, resultArray) => {
+  const hasCache = prevCache.find(
+    cache => cache.query === input && isEqual(cache.data, resultArray)
+  );
+  const newSearchCache = hasCache
+    ? prevCache
+    : [
+        ...prevCache.filter(cache => cache.query !== input),
+        {
+          query: input,
+          data: resultArray
+        }
+      ];
+  return newSearchCache.length > 10 ? drop(newSearchCache) : newSearchCache;
+};
+
 class SearchableInput extends Component {
   constructor(props) {
     super(props);
     this.initCollapse = isBoolean(this.props.resultsCollapse)
       ? this.props.resultsCollapse
       : true;
+    // prevent update or ajax fetch too often
+    this.asyncSearch = this.props.asyncSearch
+      ? this.props.enableCache
+        ? throttle(this.props.asyncSearch, 300)
+        : this.props.asyncSearch
+      : _noop;
+    this.searchCache = [];
     this.state = {
       input: "",
       focused: false,
-      searchCache: [],
-      results: this.props.collection,
-      resultsCollapse: this.initCollapse,
-      selectedItems: this.props.selectAllByDefault ? this.props.collection : []
+      selectedItems: [],
+      resultsCollapse: this.initCollapse
     };
-    // prevent update or ajax fetch too often
-    this.onValueChange = this.props.onValueChange
-      ? throttle(this.props.onValueChange, 300)
-      : null;
   }
 
   static propTypes = {
@@ -54,14 +73,15 @@ class SearchableInput extends Component {
     onPressEnter: PropTypes.func,
     placeholder: PropTypes.string,
     onListItemClick: PropTypes.func,
-    onValueChange: PropTypes.func.isRequired,
+    onValueChange: PropTypes.func,
     onBlur: PropTypes.func,
     onFocus: PropTypes.func,
-    showError: PropTypes.bool.isRequired,
+    showError: PropTypes.bool,
     defaultError: PropTypes.string,
     isDisabled: PropTypes.bool,
     resultsCollapse: PropTypes.bool,
-    ayncSearch: PropTypes.bool,
+    asyncSearch: PropTypes.func,
+    enableCache: PropTypes.bool,
     closeOnSelect: PropTypes.bool,
     multi: PropTypes.bool,
     selectAllByDefault: PropTypes.bool,
@@ -75,21 +95,7 @@ class SearchableInput extends Component {
   };
 
   componentDidMount() {
-    this.refreshSelectAll();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (!isEqual(this.props.collection, nextProps.collection)) {
-      this.setState(
-        {
-          results: nextProps.collection,
-          selectedItems: this.props.selectAllByDefault
-            ? nextProps.collection
-            : []
-        },
-        () => this.refreshSelectAll()
-      );
-    }
+    this.refreshSelectAll(this.props.collection);
   }
 
   handleOutsideClick = () => {
@@ -103,51 +109,23 @@ class SearchableInput extends Component {
   };
 
   handleChange = e => {
-    this.setState({
-      input: e.target.value
-    });
-    const maybeCached = this.state.searchCache.find(
-      cache => cache.query === e.target.value
-    );
-    if (this.onValueChange) {
-      this.onValueChange(e.target.value);
+    const input = e.target.value;
+    this.setState({ input });
+    if (this.props.onValueChange) {
+      this.props.onValueChange(input);
     }
-    const resultArray = maybeCached
-      ? maybeCached.data
-      : e.target.value === "" || this.props.ayncSearch
-      ? this.props.collection
-      : this.props.collection.filter(item => {
-          const itemName = item.label || item;
-          return (
-            includes(itemName, e.target.value) ||
-            includes(itemName.toLowerCase(), e.target.value)
-          );
-        });
-    const newSearchCache = maybeCached
-      ? this.state.searchCache
-      : [
-          ...this.state.searchCache,
-          {
-            query: e.target.value,
-            data: resultArray
-          }
-        ];
-    this.setState({
-      searchCache:
-        newSearchCache.length > 10 ? drop(newSearchCache) : newSearchCache,
-      results: resultArray,
-      resultsCollapse: false
-    });
+    if (
+      this.asyncSearch &&
+      !this.searchCache.find(cache => cache.query === input)
+    ) {
+      this.asyncSearch(input);
+    }
   };
 
-  onListItemClick = value => () => {
+  onListItemClick = (value, allItems) => () => {
     this.setState(
       {
-        input: value.label || value,
         focused: false,
-        results: isBoolean(this.props.closeOnSelect)
-          ? this.state.results
-          : this.props.collection,
         resultsCollapse: isBoolean(this.props.closeOnSelect)
           ? this.props.closeOnSelect
           : this.initCollapse,
@@ -163,12 +141,12 @@ class SearchableInput extends Component {
             )
           : value
       },
-      this.afterItemChanged
+      this.afterItemChanged(allItems)
     );
   };
 
-  afterItemChanged = () => {
-    this.refreshSelectAll();
+  afterItemChanged = allItems => () => {
+    this.refreshSelectAll(allItems);
     if (this.props.onListItemClick) {
       this.props.onListItemClick(this.state.selectedItems);
     }
@@ -184,28 +162,27 @@ class SearchableInput extends Component {
     }
   };
 
-  onSelectAllClicked = () => {
+  onSelectAllClicked = allItems => () => {
     if (this.selectAll.checked) {
       this.setState(
         {
-          selectedItems: this.state.results
+          selectedItems: allItems
         },
-        this.afterItemChanged
+        this.afterItemChanged(allItems)
       );
     } else {
       this.setState(
         {
-          selectedItems: without(this.props.collection, ...this.state.results)
+          selectedItems: without(this.props.collection, ...allItems)
         },
-        this.afterItemChanged
+        this.afterItemChanged(allItems)
       );
     }
   };
 
-  refreshSelectAll = () => {
+  refreshSelectAll = allItems => {
     if (this.selectAll) {
-      const allSelected =
-        this.state.selectedItems.length === this.state.results.length;
+      const allSelected = this.state.selectedItems.length === allItems.length;
       this.selectAll.checked = allSelected;
       this.selectAll.indeterminate =
         this.state.selectedItems.length && !allSelected;
@@ -219,22 +196,17 @@ class SearchableInput extends Component {
     if (this.props.onFocus) {
       this.props.onFocus(e);
     }
-    this.setState(
-      {
-        results: this.props.collection,
-        resultsCollapse: false,
-        focused: true
-      },
-      () => {
-        this.refreshSelectAll();
-      }
-    );
+    this.setState({
+      resultsCollapse: false,
+      focused: true
+    });
   };
 
   showDropdown = () => {
     this.filterSearch.focus();
     this.setState({
-      resultsCollapse: false
+      resultsCollapse: false,
+      focused: true
     });
   };
 
@@ -249,34 +221,60 @@ class SearchableInput extends Component {
       enableSelectAll,
       renderListItem
     } = this.props;
-    const textFieldValue = this.state.input
-      ? this.state.input
-      : placeholder || "Choose a label"; // eslint-disable-line no-extra-boolean-cast
+    const { input, focused, resultsCollapse } = this.state;
+    const textFieldValue = input ? input : placeholder || "Choose a label"; // eslint-disable-line no-extra-boolean-cast
+
+    const resultArray =
+      input === "" || this.props.asyncSearch
+        ? this.props.collection
+        : this.props.collection.filter(item => {
+            const itemName = item.label || item;
+            return (
+              includes(itemName, input) ||
+              includes(itemName.toLowerCase(), input)
+            );
+          });
+
+    // if you don't add cache or throttle control in your own component,
+    // you can pass props enableCache true to prevent calling the server too often
+    if (this.props.enableCache) {
+      this.searchCache = updateSearchCache(
+        this.searchCache,
+        input,
+        resultArray
+      );
+    }
+    console.log({
+      results: resultArray,
+      collections: this.props.collection,
+      searchCache: this.searchCache,
+      selectedItems: this.state.selectedItems
+    });
     return (
       <Wrapper>
         <Text
           onClick={isDisabled ? null : this.showDropdown}
           disabled={isDisabled}
-          visible={!this.state.focused}
+          visible={!focused}
         >
           {textFieldValue}
         </Text>
         <ClickOutside handleOutsideClick={this.handleOutsideClick}>
           <InputWrapper
-            collapse={this.state.resultsCollapse}
+            collapse={resultsCollapse}
             border={this.props.theme.border}
           >
             <Input
               type="text"
               disabled={isDisabled}
-              value={this.state.input}
+              value={input}
               placeholder={placeholder ? placeholder : "Filter"}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
               onFocus={this.onFocus}
               ref={input => (this.filterSearch = input)}
             />
-            {!isEmpty(this.state.results) && (
+            {!isEmpty(resultArray) && (
               <SearchList>
                 {multi && enableSelectAll && (
                   <SearchListItem key="all">
@@ -285,7 +283,7 @@ class SearchableInput extends Component {
                         type="checkbox"
                         className="input-checkbox"
                         disabled={false}
-                        onChange={this.onSelectAllClicked}
+                        onChange={this.onSelectAllClicked(resultArray)}
                         ref={input => (this.selectAll = input)}
                       />
                       <span>
@@ -296,7 +294,7 @@ class SearchableInput extends Component {
                     </label>
                   </SearchListItem>
                 )}
-                {this.state.results.map((item, i) =>
+                {resultArray.map((item, i) =>
                   multi ? (
                     <SearchListItem key={`${item.id}-${i}`}>
                       <label className="input-checkbox-label">
@@ -304,16 +302,25 @@ class SearchableInput extends Component {
                           type="checkbox"
                           className="input-checkbox"
                           disabled={false}
-                          checked={this.state.selectedItems.includes(item)}
-                          onChange={this.onListItemClick(item)}
+                          checked={hasItem(
+                            this.state.selectedItems.map(it => it.id),
+                            item.id
+                          )}
+                          onChange={this.onListItemClick(item, resultArray)}
                         />
-                        <span>{item.label || item}</span>
+                        {renderListItem ? (
+                          renderListItem(item)
+                        ) : (
+                          <label>
+                            <span>{item.label || item}</span>
+                          </label>
+                        )}
                       </label>
                     </SearchListItem>
                   ) : (
                     <SearchListItem
                       key={`${item.id}-${i}`}
-                      onClick={this.onListItemClick(item)}
+                      onClick={this.onListItemClick(item, resultArray)}
                     >
                       {renderListItem ? (
                         renderListItem(item)

@@ -12,6 +12,7 @@ export const Text = styled.div.attrs(({ disabled, visible }) => ({
 }))`
   cursor: pointer;
   width: 100%;
+  height: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

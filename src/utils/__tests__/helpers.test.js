@@ -1,13 +1,10 @@
-import { addOrRemoveItem, addItem, removeItem } from '../addOrRemoveItem';
+import { addOrRemoveItem, addItem, removeItem, hasItem } from '../addOrRemoveItem';
 
 describe('test items manipulation', () => {
-  const arr = [{
-    id: 1,
-    label: 'a'
-  }, {
-    id: '2',
-    label: 'b'
-  }]
+  it('test if has item', () => {
+    expect(hasItem([1, '2'], 2)).toBe(true)
+    expect(hasItem([1, '2'], 3)).toBe(false)
+  })
   it('test add item', () => {
     expect(addItem([1, '2'], 2)).toEqual(['1', '2', '2'])
   })
