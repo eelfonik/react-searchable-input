@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { includes, isEmpty, isBoolean, without, throttle } from "lodash";
 import ClickOutside from "./utils/ClickOutside";
-import { addOrRemoveItem } from "./utils/addOrRemoveItem";
+import { addOrRemoveItem, hasItem } from "./utils/addOrRemoveItem";
 import updateSearchCache from "./utils/cacheHelper";
 import { ThemeProvider } from "styled-components";
 import {
@@ -38,7 +38,8 @@ class SearchableInput extends Component {
       PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.shape({
-          id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+          id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+            .isRequired,
           label: PropTypes.string.isRequired
         })
       ])
@@ -62,7 +63,7 @@ class SearchableInput extends Component {
     onBlur: PropTypes.func,
     onFocus: PropTypes.func,
     showError: PropTypes.bool,
-    defaultError: PropTypes.string,
+    defaultError: PropTypes.string
   };
 
   static defaultProps = {
@@ -74,7 +75,7 @@ class SearchableInput extends Component {
     closeOnSelect: true,
     theme: {
       mainColor: "#F0F1F2",
-      disabledColor: '#DDDDDD',
+      disabledColor: "#DDDDDD",
       itemHeight: "34px",
       listMaxHeight: "500px"
     },
@@ -82,7 +83,7 @@ class SearchableInput extends Component {
       selectAllText: "Select all",
       unSelectAllText: "Unselect all"
     },
-    defaultError : "please select a valid label",
+    defaultError: "please select a valid label"
   };
 
   handleOutsideClick = () => {
@@ -116,12 +117,10 @@ class SearchableInput extends Component {
         focused: false,
         selectedItems: this.props.multi
           ? this.props.collection.filter(col =>
-              includes(
-                addOrRemoveItem(
-                  this.state.selectedItems.map(item => item.id),
-                  value.id
-                ),
-                col.id.toString()
+              hasItem(
+                addOrRemoveItem("id")(this.state.selectedItems, value),
+                col,
+                "id"
               )
             )
           : [value]
@@ -293,7 +292,7 @@ class SearchableInput extends Component {
                           type="checkbox"
                           className="input-checkbox"
                           disabled={false}
-                          checked={includes(this.state.selectedItems, item.id)}
+                          checked={hasItem(this.state.selectedItems, item, 'id')}
                           onChange={this.onListItemClick(item)}
                         />
                         {renderListItem ? (
@@ -308,24 +307,18 @@ class SearchableInput extends Component {
                       key={`${item.id}-${i}`}
                       onClick={this.onListItemClick(item)}
                     >
-                      <label>
-                        {renderListItem ? (
-                          renderListItem(item)
-                        ) : (
-                          <span>{item.label || item}</span>
-                        )}
-                      </label>
+                      {renderListItem ? (
+                        renderListItem(item)
+                      ) : (
+                        <span>{item.label || item}</span>
+                      )}
                     </SearchListItem>
                   )
                 )}
               </SearchList>
             )}
           </ClickOutside>
-          {showError && (
-            <ErrorInfo>
-              {defaultError}
-            </ErrorInfo>
-          )}
+          {showError && <ErrorInfo>{defaultError}</ErrorInfo>}
         </Wrapper>
       </ThemeProvider>
     );

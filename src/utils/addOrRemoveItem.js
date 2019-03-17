@@ -1,20 +1,25 @@
-export function addOrRemoveItem(arr, itemId) {
-  const formattedArray = arr.map(id => id.toString());
-  const formattedId = itemId.toString();
-  return hasItem(arr, itemId)
-    ? removeItem(formattedArray, formattedId)
-    : addItem(formattedArray, formattedId);
+import { isEqual } from 'lodash';
+
+const formatItemWith = prop => item => (item[prop] ? item[prop].toString() : item);
+// const formatItemWithId = formatItemWith("id")(item);
+// const formatItemWithLabel = formatItemWith("label")(item);
+
+const formatArray = formatFunc => arr => arr.map(formatFunc);
+
+export const addOrRemoveItem = prop => (arr, item) => {
+  return hasItem(arr, item, prop) ? removeItem(arr, item, prop) : addItem(arr, item);
 }
 
-export function hasItem(arr, itemId) {
-  return arr.map(id => id.toString()).includes(itemId.toString())
+export function hasItem(arr, item, prop) {
+  const formatItemFunc = formatItemWith(prop);
+  return !!formatArray(formatItemFunc)(arr).find(it => isEqual(it, formatItemFunc(item)));
 }
 
-export function addItem(arr, itemId) {
-  return arr.map(item => item.toString()).concat(itemId.toString());
-}
-export function removeItem(arr, itemId) {
-  return arr
-    .map(item => item.toString())
-    .filter(item => item.toString() !== itemId.toString());
+export const addItem = (arr, item) => ([...arr, item])
+
+export function removeItem(arr, item, prop) {
+  const formatItemFunc = formatItemWith(prop);
+  return arr.filter(
+    it => !isEqual(formatItemFunc(it), formatItemFunc(item))
+  );
 }
