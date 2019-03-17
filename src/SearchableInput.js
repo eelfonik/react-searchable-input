@@ -74,6 +74,7 @@ class SearchableInput extends Component {
     closeOnSelect: true,
     theme: {
       mainColor: "#F0F1F2",
+      disabledColor: '#DDDDDD',
       itemHeight: "34px",
       listMaxHeight: "500px"
     },

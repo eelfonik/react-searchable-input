@@ -6,10 +6,7 @@ export const Wrapper = styled.div`
   width: 100%;
 `
 
-export const Text = styled.div.attrs({
-  bg: props => props.disabled ? '#F0F1F2' : 'inherit',
-  opacity: props => props.visible ? 1 : 0
-})`
+export const Text = styled.div`
   cursor: pointer;
   width: 100%;
   height: ${props => props.theme.itemHeight};
@@ -17,14 +14,12 @@ export const Text = styled.div.attrs({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background-color: ${props => props.bg};
-  opacity: ${props => props.opacity};
+  background-color: ${props => props.disabled ? props.thems.disabledColor : 'inherit'};
+  opacity: ${props => props.visible ? 1 : 0};
 `;
 
-export const Input = styled.input.attrs({
-  opacity: props => props.visible ? 1 : 0,
-})`
-  opacity: ${props => props.opacity};
+export const Input = styled.input`
+  opacity: ${props => props.visible ? 1 : 0};
   display: inline-block;
   width: 100%;
   height: ${props => props.theme.itemHeight};
@@ -48,15 +43,12 @@ export const Input = styled.input.attrs({
   }
 `;
 
-export const SearchList = styled.ul.attrs({
-  maxHeight: props => props.showResults ? props.theme.listMaxHeight : '0px',
-  paddingTop: props => props.hasTop ? props.theme.itemHeight : '0px'
-})`
+export const SearchList = styled.ul`
   width: 100%;
   box-sizing: border-box;
   background: inherit;
-  padding-top: ${props => props.paddingTop};
-  max-height: ${props => props.maxHeight};
+  padding-top: ${props => props.hasTop ? props.theme.itemHeight : '0px'};
+  max-height: ${props => props.showResults ? props.theme.listMaxHeight : '0px'};
   overflow: scroll;
   color: inherit;
 `;

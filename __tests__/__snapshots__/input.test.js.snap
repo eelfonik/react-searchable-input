@@ -11,7 +11,6 @@ exports[`Click out side of a component 1`] = `
       onChange={[Function]}
       onFocus={[Function]}
       onKeyPress={[Function]}
-      opacity={1}
       placeholder="Choose an item"
       type="text"
       value=""
