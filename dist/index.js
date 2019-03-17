@@ -2,7 +2,7 @@
   position: relative;
   min-height: ${e=>e.theme.itemHeight};
   width: 100%;
-`,m=u.a.div.attrs(({disabled:e,visible:t})=>({bg:e?"#F0F1F2":"inherit",opacity:t?1:0}))`
+`,m=u.a.div.attrs({bg:e=>e.disabled?"#F0F1F2":"inherit",opacity:e=>e.visible?1:0})`
   cursor: pointer;
   width: 100%;
   height: ${e=>e.theme.itemHeight};
@@ -12,7 +12,7 @@
   white-space: nowrap;
   background-color: ${e=>e.bg};
   opacity: ${e=>e.opacity};
-`,f=u.a.input.attrs(({visible:e})=>({opacity:e?1:0}))`
+`,f=u.a.input.attrs({opacity:e=>e.visible?1:0})`
   opacity: ${e=>e.opacity};
   display: inline-block;
   width: 100%;
@@ -35,7 +35,7 @@
     font-family: inherit;
     font-size: 1em;
   }
-`,b=u.a.ul.attrs(({showResults:e,hasTop:t,theme:s})=>({maxHeight:e?s.listMaxHeight:"0px",paddingTop:t?s.itemHeight:"0px"}))`
+`,b=u.a.ul.attrs({maxHeight:e=>e.showResults?e.theme.listMaxHeight:"0px",paddingTop:e=>e.hasTop?e.theme.itemHeight:"0px"})`
   width: 100%;
   box-sizing: border-box;
   background: inherit;
