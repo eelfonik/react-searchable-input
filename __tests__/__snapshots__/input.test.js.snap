@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Click out side of a component 1`] = `
+<div
+  className="sc-bdVaJa kPnyzb"
+>
+  <div>
+    <input
+      className="sc-htpNat Jncmz"
+      onChange={[Function]}
+      onFocus={[Function]}
+      onKeyPress={[Function]}
+      opacity={1}
+      placeholder="Filter"
+      type="text"
+      value=""
+    />
+    <ul
+      className="sc-bxivhb hedZsr"
+    >
+      <li
+        className="sc-ifAKCX hGzdEu"
+        onClick={[Function]}
+      >
+        <label>
+          <span>
+            test1
+          </span>
+        </label>
+      </li>
+      <li
+        className="sc-ifAKCX hGzdEu"
+        onClick={[Function]}
+      >
+        <label>
+          <span>
+            test2
+          </span>
+        </label>
+      </li>
+    </ul>
+  </div>
+</div>
+`;

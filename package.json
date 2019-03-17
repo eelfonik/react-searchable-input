@@ -1,7 +1,7 @@
 {
   "name": "react-searchable-input",
   "version": "0.0.1",
-  "description": "React input component with search & select bulidin",
+  "description": "React input component with search & select bulitin",
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint src/*",
@@ -18,8 +18,7 @@
     "url": "https://github.com/eelfonik/react-searchable-input.git"
   },
   "files": [
-    "lib",
-    "umd"
+    "dist"
   ],
   "keywords": [
     "input",
@@ -67,10 +66,8 @@
   "peerDependencies": {
     "styled-components": ">= 4",
     "react": ">= 16",
-    "react-dom": ">= 16"
-  },
-  "dependencies": {
-    "lodash-es": "^4.17.11"
+    "react-dom": ">= 16",
+    "lodash": ">= 4"
   },
   "jest": {
     "testPathIgnorePatterns": [

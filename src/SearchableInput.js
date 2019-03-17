@@ -1,50 +1,23 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import {
-  includes,
-  isEmpty,
-  isEqual,
-  isBoolean,
-  without,
-  throttle,
-  drop
-} from "lodash-es";
+import { includes, isEmpty, isBoolean, without, throttle } from "lodash";
 import ClickOutside from "./utils/ClickOutside";
-import { addOrRemoveItem, hasItem } from "./utils/addOrRemoveItem";
+import { addOrRemoveItem } from "./utils/addOrRemoveItem";
+import updateSearchCache from "./utils/cacheHelper";
+import { ThemeProvider } from "styled-components";
 import {
   Wrapper,
   Text,
-  InputWrapper,
   Input,
   SearchList,
   SearchListItem,
   ErrorInfo
 } from "./styled-components";
 
-const _noop = () => {}
-
-const updateSearchCache = (prevCache, input, resultArray) => {
-  const hasCache = prevCache.find(
-    cache => cache.query === input && isEqual(cache.data, resultArray)
-  );
-  const newSearchCache = hasCache
-    ? prevCache
-    : [
-        ...prevCache.filter(cache => cache.query !== input),
-        {
-          query: input,
-          data: resultArray
-        }
-      ];
-  return newSearchCache.length > 10 ? drop(newSearchCache) : newSearchCache;
-};
-
+const _noop = () => {};
 class SearchableInput extends Component {
   constructor(props) {
     super(props);
-    this.initCollapse = isBoolean(this.props.resultsCollapse)
-      ? this.props.resultsCollapse
-      : true;
     // prevent update or ajax fetch too often
     this.asyncSearch = this.props.asyncSearch
       ? this.props.enableCache
@@ -56,7 +29,7 @@ class SearchableInput extends Component {
       input: "",
       focused: false,
       selectedItems: [],
-      resultsCollapse: this.initCollapse
+      showResults: false
     };
   }
 
@@ -65,7 +38,7 @@ class SearchableInput extends Component {
       PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.shape({
-          id: PropTypes.string,
+          id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
           label: PropTypes.string
         })
       ])
@@ -79,24 +52,32 @@ class SearchableInput extends Component {
     showError: PropTypes.bool,
     defaultError: PropTypes.string,
     isDisabled: PropTypes.bool,
-    resultsCollapse: PropTypes.bool,
     asyncSearch: PropTypes.func,
     enableCache: PropTypes.bool,
     closeOnSelect: PropTypes.bool,
     multi: PropTypes.bool,
+    showLabelText: PropTypes.bool,
     selectAllByDefault: PropTypes.bool,
-    selectAllText: PropTypes.shape({
-      selectAll: PropTypes.string,
-      unSelectAll: PropTypes.string
+    selectAll: PropTypes.shape({
+      selectAllText: PropTypes.string,
+      unSelectAllText: PropTypes.string
     }),
     enableSelectAll: PropTypes.bool,
     theme: PropTypes.object,
     renderListItem: PropTypes.func
   };
 
-  componentDidMount() {
-    this.refreshSelectAll(this.props.collection);
-  }
+  static defaultProps = {
+    theme: {
+      mainColor: "#F0F1F2",
+      itemHeight: "34px",
+      listMaxHeight: "500px"
+    },
+    selectAll: {
+      selectAllText: "Select all",
+      unSelectAllText: "Unselect all"
+    }
+  };
 
   handleOutsideClick = () => {
     if (this.props.onBlur) {
@@ -104,13 +85,17 @@ class SearchableInput extends Component {
     }
     this.setState({
       focused: false,
-      resultsCollapse: this.initCollapse
+      showResults: false
     });
   };
 
   handleChange = e => {
     const input = e.target.value;
-    this.setState({ input });
+    this.setState({
+      input,
+      selectedItems: this.props.multi ? this.state.selectedItems : [],
+      showResults: true
+    });
     if (this.props.onValueChange) {
       this.props.onValueChange(input);
     }
@@ -122,13 +107,10 @@ class SearchableInput extends Component {
     }
   };
 
-  onListItemClick = (value, allItems) => () => {
+  onListItemClick = value => () => {
     this.setState(
       {
         focused: false,
-        resultsCollapse: isBoolean(this.props.closeOnSelect)
-          ? this.props.closeOnSelect
-          : this.initCollapse,
         selectedItems: this.props.multi
           ? this.props.collection.filter(col =>
               includes(
@@ -139,14 +121,20 @@ class SearchableInput extends Component {
                 col.id.toString()
               )
             )
-          : value
+          : [value]
       },
-      this.afterItemChanged(allItems)
+      this.afterItemChanged
     );
   };
 
-  afterItemChanged = allItems => () => {
-    this.refreshSelectAll(allItems);
+  afterItemChanged = () => {
+    this.setState({
+      showResults: isBoolean(this.props.multi)
+        ? this.props.multi
+        : isBoolean(this.props.closeOnSelect)
+        ? !this.props.closeOnSelect
+        : false
+    });
     if (this.props.onListItemClick) {
       this.props.onListItemClick(this.state.selectedItems);
     }
@@ -168,27 +156,15 @@ class SearchableInput extends Component {
         {
           selectedItems: allItems
         },
-        this.afterItemChanged(allItems)
+        this.afterItemChanged
       );
     } else {
       this.setState(
         {
           selectedItems: without(this.props.collection, ...allItems)
         },
-        this.afterItemChanged(allItems)
+        this.afterItemChanged
       );
-    }
-  };
-
-  refreshSelectAll = allItems => {
-    if (this.selectAll) {
-      const allSelected = this.state.selectedItems.length === allItems.length;
-      this.selectAll.checked = allSelected;
-      this.selectAll.indeterminate =
-        this.state.selectedItems.length && !allSelected;
-      this.setState({
-        allSelected: allSelected
-      });
     }
   };
 
@@ -197,7 +173,7 @@ class SearchableInput extends Component {
       this.props.onFocus(e);
     }
     this.setState({
-      resultsCollapse: false,
+      showResults: true,
       focused: true
     });
   };
@@ -205,7 +181,7 @@ class SearchableInput extends Component {
   showDropdown = () => {
     this.filterSearch.focus();
     this.setState({
-      resultsCollapse: false,
+      showResults: true,
       focused: true
     });
   };
@@ -217,12 +193,20 @@ class SearchableInput extends Component {
       showError,
       defaultError,
       multi,
-      selectAllText,
+      selectAll,
       enableSelectAll,
-      renderListItem
+      renderListItem,
+      showLabelText
     } = this.props;
-    const { input, focused, resultsCollapse } = this.state;
-    const textFieldValue = input ? input : placeholder || "Choose a label"; // eslint-disable-line no-extra-boolean-cast
+    const { input, focused, showResults, selectedItems } = this.state;
+    const getTextValue = () => {
+      if (selectedItems.length) {
+        return multi
+          ? `${selectedItems.length} selected`
+          : selectedItems[0].label || selectedItems[0];
+      }
+      return placeholder || "Choose an item";
+    };
 
     const resultArray =
       input === "" || this.props.asyncSearch
@@ -244,6 +228,15 @@ class SearchableInput extends Component {
         resultArray
       );
     }
+
+    let allSelected = false;
+    if (this.selectAll) {
+      const isAllSelected = selectedItems.length === resultArray.length;
+      this.selectAll.checked = isAllSelected;
+      this.selectAll.indeterminate = selectedItems.length && !isAllSelected;
+      allSelected = isAllSelected;
+    }
+
     console.log({
       results: resultArray,
       collections: this.props.collection,
@@ -251,31 +244,32 @@ class SearchableInput extends Component {
       selectedItems: this.state.selectedItems
     });
     return (
-      <Wrapper>
-        <Text
-          onClick={isDisabled ? null : this.showDropdown}
-          disabled={isDisabled}
-          visible={!focused}
-        >
-          {textFieldValue}
-        </Text>
-        <ClickOutside handleOutsideClick={this.handleOutsideClick}>
-          <InputWrapper
-            collapse={resultsCollapse}
-            border={this.props.theme.border}
-          >
+      <ThemeProvider theme={this.props.theme}>
+        <Wrapper>
+          {showLabelText && (
+            <Text
+              onClick={isDisabled ? null : this.showDropdown}
+              disabled={isDisabled}
+              visible={!focused}
+            >
+              {getTextValue()}
+            </Text>
+          )}
+          <ClickOutside handleOutsideClick={this.handleOutsideClick}>
             <Input
               type="text"
               disabled={isDisabled}
               value={input}
               placeholder={placeholder ? placeholder : "Filter"}
+              mainColor={this.props.theme.mainColor}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
               onFocus={this.onFocus}
+              visible={!showLabelText || focused}
               ref={input => (this.filterSearch = input)}
             />
             {!isEmpty(resultArray) && (
-              <SearchList>
+              <SearchList showResults={showResults} hasTop={!showLabelText}>
                 {multi && enableSelectAll && (
                   <SearchListItem key="all">
                     <label className="input-checkbox-label">
@@ -287,9 +281,9 @@ class SearchableInput extends Component {
                         ref={input => (this.selectAll = input)}
                       />
                       <span>
-                        {this.state.allSelected
-                          ? selectAllText.unSelectAll
-                          : selectAllText.selectAll}
+                        {allSelected
+                          ? selectAll.unSelectAllText
+                          : selectAll.selectAllText}
                       </span>
                     </label>
                   </SearchListItem>
@@ -302,46 +296,41 @@ class SearchableInput extends Component {
                           type="checkbox"
                           className="input-checkbox"
                           disabled={false}
-                          checked={hasItem(
-                            this.state.selectedItems.map(it => it.id),
-                            item.id
-                          )}
-                          onChange={this.onListItemClick(item, resultArray)}
+                          checked={includes(this.state.selectedItems, item.id)}
+                          onChange={this.onListItemClick(item)}
                         />
                         {renderListItem ? (
                           renderListItem(item)
                         ) : (
-                          <label>
-                            <span>{item.label || item}</span>
-                          </label>
+                          <span>{item.label || item}</span>
                         )}
                       </label>
                     </SearchListItem>
                   ) : (
                     <SearchListItem
                       key={`${item.id}-${i}`}
-                      onClick={this.onListItemClick(item, resultArray)}
+                      onClick={this.onListItemClick(item)}
                     >
-                      {renderListItem ? (
-                        renderListItem(item)
-                      ) : (
-                        <label>
+                      <label>
+                        {renderListItem ? (
+                          renderListItem(item)
+                        ) : (
                           <span>{item.label || item}</span>
-                        </label>
-                      )}
+                        )}
+                      </label>
                     </SearchListItem>
                   )
                 )}
               </SearchList>
             )}
-          </InputWrapper>
-        </ClickOutside>
-        {showError && (
-          <ErrorInfo>
-            {defaultError ? defaultError : "please select a valid label"}
-          </ErrorInfo>
-        )}
-      </Wrapper>
+          </ClickOutside>
+          {showError && (
+            <ErrorInfo>
+              {defaultError ? defaultError : "please select a valid label"}
+            </ErrorInfo>
+          )}
+        </Wrapper>
+      </ThemeProvider>
     );
   }
 }

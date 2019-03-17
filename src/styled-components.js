@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const Wrapper = styled.div`
   position: relative;
-  height: 34px;
+  min-height: ${props => props.theme.itemHeight};
   width: 100%;
 `
 
@@ -12,7 +12,8 @@ export const Text = styled.div.attrs(({ disabled, visible }) => ({
 }))`
   cursor: pointer;
   width: 100%;
-  height: 100%;
+  height: ${props => props.theme.itemHeight};
+  line-height: ${props => props.theme.itemHeight};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -20,59 +21,51 @@ export const Text = styled.div.attrs(({ disabled, visible }) => ({
   opacity: ${props => props.opacity};
 `;
 
-export const InputWrapper = styled.div.attrs(({ collapse, border }) => ({
-  maxHeight: collapse ? '0px' : '100vh',
-  border,
+export const Input = styled.input.attrs(({visible}) => ({
+  opacity: visible ? 1 : 0,
 }))`
-  width: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 3;
-  background: inherit;
-  border: ${props => props.border};
-  max-height: ${props => props.maxHeight};
-  overflow: hidden;
-  color: inherit;
-`;
-
-export const Input = styled.input`
+  opacity: ${props => props.opacity};
   display: inline-block;
   width: 100%;
+  height: ${props => props.theme.itemHeight};
+  line-height: ${props => props.theme.itemHeight};
   padding: 0;
   margin: 0;
   background-color: inherit;
   border: 0;
+  border-bottom: 1px solid ${props => props.theme.mainColor};
   outline: none;
   font-family: inherit;
   color: inherit;
   font-size: 1em;
-  line-height: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
   &:placeholder {
     font-family: inherit;
     font-size: 1em;
   }
 `;
 
-export const SearchList = styled.ul.attrs(() => ({
-  borderColor: '#e4eaf0',
+export const SearchList = styled.ul.attrs(({ showResults, hasTop, theme }) => ({
+  maxHeight: showResults ? theme.listMaxHeight : '0px',
+  paddingTop: hasTop ? theme.itemHeight : '0px'
 }))`
-  font-size: 14px;
-  border: 1px solid #e4eaf0;
-  border-color: ${props => props.borderColor};
-  max-height: 218px;
+  width: 100%;
+  box-sizing: border-box;
+  background: inherit;
+  padding-top: ${props => props.paddingTop};
+  max-height: ${props => props.maxHeight};
   overflow: scroll;
+  color: inherit;
 `;
 
 export const SearchListItem = styled.li`
   box-sizing: border-box;
-  padding: 6px 10px;
   background: inherit;
   color: inherit;
-  line-height: 20px;
-  &:not(:last-child) {
-      border-bottom: 1px solid #e4eaf0;
-  }
+  line-height: ${props => props.theme.itemHeight};
 `;
 
 export const ErrorInfo = styled.span`
