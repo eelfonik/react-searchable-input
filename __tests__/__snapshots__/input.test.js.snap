@@ -7,11 +7,12 @@ exports[`Click out side of a component 1`] = `
   <div>
     <input
       className="sc-htpNat Jncmz"
+      disabled={false}
       onChange={[Function]}
       onFocus={[Function]}
       onKeyPress={[Function]}
       opacity={1}
-      placeholder="Filter"
+      placeholder="Choose an item"
       type="text"
       value=""
     />

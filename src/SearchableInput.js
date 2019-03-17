@@ -38,36 +38,40 @@ class SearchableInput extends Component {
       PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.shape({
-          id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-          label: PropTypes.string
+          id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+          label: PropTypes.string.isRequired
         })
       ])
     ).isRequired,
-    onPressEnter: PropTypes.func,
     placeholder: PropTypes.string,
-    onListItemClick: PropTypes.func,
-    onValueChange: PropTypes.func,
-    onBlur: PropTypes.func,
-    onFocus: PropTypes.func,
-    showError: PropTypes.bool,
-    defaultError: PropTypes.string,
     isDisabled: PropTypes.bool,
+    onListItemClick: PropTypes.func,
     asyncSearch: PropTypes.func,
     enableCache: PropTypes.bool,
-    closeOnSelect: PropTypes.bool,
     multi: PropTypes.bool,
     showLabelText: PropTypes.bool,
-    selectAllByDefault: PropTypes.bool,
+    closeOnSelect: PropTypes.bool,
     selectAll: PropTypes.shape({
       selectAllText: PropTypes.string,
       unSelectAllText: PropTypes.string
     }),
     enableSelectAll: PropTypes.bool,
     theme: PropTypes.object,
-    renderListItem: PropTypes.func
+    renderListItem: PropTypes.func,
+    onPressEnter: PropTypes.func,
+    onBlur: PropTypes.func,
+    onFocus: PropTypes.func,
+    showError: PropTypes.bool,
+    defaultError: PropTypes.string,
   };
 
   static defaultProps = {
+    placeholder: "Choose an item",
+    isDisabled: false,
+    showLabelText: false,
+    multi: false,
+    enableCache: false,
+    closeOnSelect: true,
     theme: {
       mainColor: "#F0F1F2",
       itemHeight: "34px",
@@ -76,7 +80,8 @@ class SearchableInput extends Component {
     selectAll: {
       selectAllText: "Select all",
       unSelectAllText: "Unselect all"
-    }
+    },
+    defaultError : "please select a valid label",
   };
 
   handleOutsideClick = () => {
@@ -96,9 +101,6 @@ class SearchableInput extends Component {
       selectedItems: this.props.multi ? this.state.selectedItems : [],
       showResults: true
     });
-    if (this.props.onValueChange) {
-      this.props.onValueChange(input);
-    }
     if (
       this.asyncSearch &&
       !this.searchCache.find(cache => cache.query === input)
@@ -205,7 +207,7 @@ class SearchableInput extends Component {
           ? `${selectedItems.length} selected`
           : selectedItems[0].label || selectedItems[0];
       }
-      return placeholder || "Choose an item";
+      return placeholder;
     };
 
     const resultArray =
@@ -237,12 +239,6 @@ class SearchableInput extends Component {
       allSelected = isAllSelected;
     }
 
-    console.log({
-      results: resultArray,
-      collections: this.props.collection,
-      searchCache: this.searchCache,
-      selectedItems: this.state.selectedItems
-    });
     return (
       <ThemeProvider theme={this.props.theme}>
         <Wrapper>
@@ -260,7 +256,7 @@ class SearchableInput extends Component {
               type="text"
               disabled={isDisabled}
               value={input}
-              placeholder={placeholder ? placeholder : "Filter"}
+              placeholder={placeholder}
               mainColor={this.props.theme.mainColor}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
@@ -326,7 +322,7 @@ class SearchableInput extends Component {
           </ClickOutside>
           {showError && (
             <ErrorInfo>
-              {defaultError ? defaultError : "please select a valid label"}
+              {defaultError}
             </ErrorInfo>
           )}
         </Wrapper>
