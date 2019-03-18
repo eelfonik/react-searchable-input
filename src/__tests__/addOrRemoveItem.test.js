@@ -3,7 +3,7 @@ import {
   addItem,
   removeItem,
   hasItem
-} from "../addOrRemoveItem";
+} from "../utils/addOrRemoveItem";
 
 describe("test items manipulation", () => {
   it("test if has item", () => {

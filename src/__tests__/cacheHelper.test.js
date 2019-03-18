@@ -1,4 +1,4 @@
-import updateSearchCache from "../cacheHelper";
+import updateSearchCache from "../utils/cacheHelper";
 
 describe("Test cache helper", () => {
   const prevCache = [{ query: "a", data: [{ id: 1, text: "1" }] }];

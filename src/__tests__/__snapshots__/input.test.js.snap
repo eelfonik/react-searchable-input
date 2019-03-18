@@ -19,7 +19,7 @@ exports[`Click out side of a component 1`] = `
       className="sc-bxivhb hedZsr"
     >
       <li
-        className="sc-ifAKCX hGzdEu"
+        className="sc-ifAKCX jUOmfR"
         onClick={[Function]}
       >
         <span>
@@ -27,7 +27,7 @@ exports[`Click out side of a component 1`] = `
         </span>
       </li>
       <li
-        className="sc-ifAKCX hGzdEu"
+        className="sc-ifAKCX jUOmfR"
         onClick={[Function]}
       >
         <span>

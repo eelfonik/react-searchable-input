@@ -57,6 +57,7 @@ export const SearchListItem = styled.li`
   box-sizing: border-box;
   background: inherit;
   color: inherit;
+  cursor: pointer;
   line-height: ${props => props.theme.itemHeight};
 `;
 

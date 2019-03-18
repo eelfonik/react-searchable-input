@@ -1,6 +1,6 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
-import ClickOutside from '../ClickOutside';
+import ClickOutside from '../utils/ClickOutside';
 
 test('Click out side of a component', () => {
   const component = renderer.create(

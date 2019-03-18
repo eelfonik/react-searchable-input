@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { includes, isEmpty, isBoolean, without, throttle } from "lodash";
+import { includes, isEmpty, without, throttle } from "lodash";
 import ClickOutside from "./utils/ClickOutside";
 import { addOrRemoveItem, hasItem } from "./utils/addOrRemoveItem";
 import updateSearchCache from "./utils/cacheHelper";
@@ -111,19 +111,19 @@ class SearchableInput extends Component {
     }
   };
 
-  onListItemClick = value => () => {
+  onListItemClick = item => () => {
     this.setState(
       {
         focused: false,
         selectedItems: this.props.multi
           ? this.props.collection.filter(col =>
               hasItem(
-                addOrRemoveItem("id")(this.state.selectedItems, value),
+                addOrRemoveItem("id")(this.state.selectedItems, item),
                 col,
                 "id"
               )
             )
-          : [value]
+          : [item]
       },
       this.afterItemChanged
     );
@@ -131,11 +131,7 @@ class SearchableInput extends Component {
 
   afterItemChanged = () => {
     this.setState({
-      showResults: isBoolean(this.props.multi)
-        ? this.props.multi
-        : isBoolean(this.props.closeOnSelect)
-        ? !this.props.closeOnSelect
-        : false
+      showResults: this.props.multi || !this.props.closeOnSelect
     });
     if (this.props.onListItemClick) {
       this.props.onListItemClick(this.state.selectedItems);
@@ -153,21 +149,14 @@ class SearchableInput extends Component {
   };
 
   onSelectAllClicked = allItems => () => {
-    if (this.selectAll.checked) {
-      this.setState(
-        {
-          selectedItems: allItems
-        },
-        this.afterItemChanged
-      );
-    } else {
-      this.setState(
-        {
-          selectedItems: without(this.props.collection, ...allItems)
-        },
-        this.afterItemChanged
-      );
-    }
+    this.setState(
+      {
+        selectedItems: this.selectAll.checked
+          ? allItems
+          : without(this.props.collection, ...allItems)
+      },
+      this.afterItemChanged
+    );
   };
 
   onFocus = e => {
@@ -292,7 +281,11 @@ class SearchableInput extends Component {
                           type="checkbox"
                           className="input-checkbox"
                           disabled={false}
-                          checked={hasItem(this.state.selectedItems, item, 'id')}
+                          checked={hasItem(
+                            this.state.selectedItems,
+                            item,
+                            "id"
+                          )}
                           onChange={this.onListItemClick(item)}
                         />
                         {renderListItem ? (

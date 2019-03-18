@@ -1,6 +1,6 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
-import SearchableInput from '../src/SearchableInput';
+import SearchableInput from '../SearchableInput';
 
 test('Click out side of a component', () => {
   const component = renderer.create(
