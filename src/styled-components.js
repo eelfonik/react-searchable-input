@@ -44,6 +44,7 @@ export const Input = styled.input`
 `;
 
 export const SearchList = styled.ul`
+  position: absolute;
   width: 100%;
   box-sizing: border-box;
   background: inherit;

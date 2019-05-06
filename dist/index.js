@@ -36,6 +36,7 @@
     font-size: 1em;
   }
 `,k=y.a.ul`
+  position: absolute;
   width: 100%;
   box-sizing: border-box;
   background: inherit;
