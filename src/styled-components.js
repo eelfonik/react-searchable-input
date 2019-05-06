@@ -28,7 +28,6 @@ export const Input = styled.input`
   margin: 0;
   background-color: inherit;
   border: 0;
-  border-bottom: 1px solid ${props => props.theme.mainColor};
   outline: none;
   font-family: inherit;
   color: inherit;

@@ -32,7 +32,6 @@ const someComponent = ({ collection }) => (
       collection={collection.map(col => ({...col, id: col.id, label: col.name}))}
       placeholder='search for something'
       theme={{
-        mainColor: 'transparent',
         itemHeight: '30px'
       }}
       renderListItem={renderListItem}
@@ -55,7 +54,7 @@ const someComponent = ({ collection }) => (
 | closeOnSelect |  boolean | true | control if the search list should be hidden after selected an item, always false for multi-selection |
 | enableSelectAll | boolean |   false | used when active `multi` option, add an option on top of search list, to select/deselect all avaiable items on the list  |
 | selectAll |   object  |  <pre>{</br>selectAllText: "Select all",</br>unSelectAllText: "Unselect all"</br>}</pre> | text to display for select/deselect all when `enableSelectAll` is `true`
-| theme | object |  <pre>{</br>mainColor: "#F0F1F2",</br>disabledColor:"#DDDDDD",</br>itemHeight: "34px",</br>listMaxHeight: "500px"</br>}</pre> | some theme variables allow to custom the color of list, EX: `mainColor` is used for `border-bottom` of the input field (pass `transparent` if you don't want one)
+| theme | object |  <pre>{</br>disabledColor:"#DDDDDD",</br>itemHeight: "34px",</br>listMaxHeight: "500px"</br>}</pre> | some theme variables allow to custom the color of list)
 | renderListItem |  function |  | a render function allows to customize the list items, it takes the shape of item inside `collection` props, and should return a validated DOM node/ react node | 
 | onPressEnter |   function   |    | function to call with current input value when user typed `enter` key |
 | onBlur | function |    | additional function to call when the whole component lost focus |

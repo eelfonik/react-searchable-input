@@ -74,7 +74,6 @@ class SearchableInput extends Component {
     enableCache: false,
     closeOnSelect: true,
     theme: {
-      mainColor: "#F0F1F2",
       disabledColor: "#DDDDDD",
       itemHeight: "34px",
       listMaxHeight: "500px"
@@ -246,7 +245,6 @@ class SearchableInput extends Component {
               disabled={isDisabled}
               value={input}
               placeholder={placeholder}
-              mainColor={this.props.theme.mainColor}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
               onFocus={this.onFocus}
