@@ -1,6 +1,6 @@
 {
   "name": "react-searchable-input",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "React input component with search & select bulitin",
   "main": "dist/index.js",
   "scripts": {
