@@ -2,28 +2,26 @@ import styled from 'styled-components';
 
 export const Wrapper = styled.div`
   position: relative;
-  min-height: ${props => props.theme.itemHeight};
+  min-height: ${props => props.theme.inputHeight};
   width: 100%;
 `
 
 export const Text = styled.div`
   cursor: pointer;
   width: 100%;
-  height: ${props => props.theme.itemHeight};
-  line-height: ${props => props.theme.itemHeight};
+  height: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: ${props => props.greyOut ? '#818181' : 'inherit'};
   background-color: ${props => props.disabled ? props.thems.disabledColor : 'inherit'};
   opacity: ${props => props.visible ? 1 : 0};
 `;
 
 export const Input = styled.input`
   opacity: ${props => props.visible ? 1 : 0};
-  display: inline-block;
   width: 100%;
-  height: ${props => props.theme.itemHeight};
-  line-height: ${props => props.theme.itemHeight};
+  height: ${props => props.theme.inputHeight};
   padding: 0;
   margin: 0;
   background-color: inherit;
@@ -44,10 +42,12 @@ export const Input = styled.input`
 
 export const SearchList = styled.ul`
   position: absolute;
-  width: 100%;
+  top: ${props => props.theme.listTop};
+  left: ${props => props.theme.listLeft};
+  padding: 0 ${props => props.theme.listPadding};
+  width: ${props => props.theme.listWidth || '100%'};
   box-sizing: border-box;
-  background: inherit;
-  padding-top: ${props => props.hasTop ? props.theme.itemHeight : '0px'};
+  background-color: ${props => props.theme.listBg || 'transparent'};
   max-height: ${props => props.showResults ? props.theme.listMaxHeight : '0px'};
   overflow: scroll;
   color: inherit;
@@ -58,7 +58,6 @@ export const SearchListItem = styled.li`
   background: inherit;
   color: inherit;
   cursor: pointer;
-  line-height: ${props => props.theme.itemHeight};
 `;
 
 export const ErrorInfo = styled.span`

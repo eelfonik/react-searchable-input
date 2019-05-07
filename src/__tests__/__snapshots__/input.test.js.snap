@@ -6,7 +6,7 @@ exports[`Click out side of a component 1`] = `
 >
   <div>
     <input
-      className="sc-htpNat Jncmz"
+      className="sc-htpNat beoLBr"
       disabled={false}
       onChange={[Function]}
       onFocus={[Function]}
@@ -16,10 +16,10 @@ exports[`Click out side of a component 1`] = `
       value=""
     />
     <ul
-      className="sc-bxivhb hedZsr"
+      className="sc-bxivhb eQUAQd"
     >
       <li
-        className="sc-ifAKCX jUOmfR"
+        className="sc-ifAKCX gVdIsk"
         onClick={[Function]}
       >
         <span>
@@ -27,7 +27,7 @@ exports[`Click out side of a component 1`] = `
         </span>
       </li>
       <li
-        className="sc-ifAKCX jUOmfR"
+        className="sc-ifAKCX gVdIsk"
         onClick={[Function]}
       >
         <span>

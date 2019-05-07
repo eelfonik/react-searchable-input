@@ -75,8 +75,13 @@ class SearchableInput extends Component {
     closeOnSelect: true,
     theme: {
       disabledColor: "#DDDDDD",
-      itemHeight: "34px",
-      listMaxHeight: "500px"
+      inputHeight: '34px',
+      listMaxHeight: "500px",
+      listPadding: '20px',
+      listWidth: '100%',
+      listTop: '30px',
+      listLeft: '0px',
+      listBg: 'transparent'
     },
     selectAll: {
       selectAllText: "Select all",
@@ -189,13 +194,19 @@ class SearchableInput extends Component {
       showLabelText
     } = this.props;
     const { input, focused, showResults, selectedItems } = this.state;
-    const getTextValue = () => {
+    const getText = () => {
       if (selectedItems.length) {
-        return multi
-          ? `${selectedItems.length} selected`
-          : selectedItems[0].label || selectedItems[0];
+        return {
+          text: multi
+              ? `${selectedItems.length} selected`
+              : selectedItems[0].label || selectedItems[0],
+          isPlaceholder: false
+        }
       }
-      return placeholder;
+      return {
+        text: placeholder,
+        isPlaceholder: true,
+      }
     };
 
     const resultArray =
@@ -235,8 +246,9 @@ class SearchableInput extends Component {
               onClick={isDisabled ? null : this.showDropdown}
               disabled={isDisabled}
               visible={!focused}
+              greyOut={getText().isPlaceholder}
             >
-              {getTextValue()}
+              {getText().text}
             </Text>
           )}
           <ClickOutside handleOutsideClick={this.handleOutsideClick}>
@@ -252,7 +264,7 @@ class SearchableInput extends Component {
               ref={input => (this.filterSearch = input)}
             />
             {!isEmpty(resultArray) && (
-              <SearchList showResults={showResults} hasTop={!showLabelText}>
+              <SearchList showResults={showResults} >
                 {multi && enableSelectAll && (
                   <SearchListItem key="all">
                     <label className="input-checkbox-label">
