@@ -79,7 +79,7 @@ class SearchableInput extends Component {
       listMaxHeight: "500px",
       listPadding: '20px',
       listWidth: '100%',
-      listTop: '30px',
+      listTop: '34px',
       listLeft: '0px',
       listBg: 'transparent'
     },
